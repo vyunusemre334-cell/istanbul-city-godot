@@ -1,0 +1,43 @@
+name: Build Godot APK
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Depoyu İndir
+        uses: actions/checkout@v4
+
+      - name: ZIP Dosyasını Aç
+        run: |
+          unzip -o "*.zip"
+
+      - name: Godot ve Android Export Şablonlarını Kur
+        run: |
+          sudo apt-get update && sudo apt-get install -y wget unzip openjdk-17-jdk
+          # Godot 4.3 İndir
+          wget https://github.com/godotengine/godot/releases/download/4.3-stable/Godot_v4.3-stable_linux.x86_64.zip
+          unzip Godot_v4.3-stable_linux.x86_64.zip
+          mv Godot_v4.3-stable_linux.x86_64 /usr/local/bin/godot
+
+          # Export Şablonlarını İndir
+          mkdir -p ~/.local/share/godot/export_templates/4.3.stable
+          wget https://github.com/godotengine/godot/releases/download/4.3-stable/Godot_v4.3-stable_export_templates.tpz
+          unzip Godot_v4.3-stable_export_templates.tpz
+          mv templates/* ~/.local/share/godot/export_templates/4.3.stable/
+
+      - name: APK Derle (Export)
+        run: |
+          cd istanbul_city_godot
+          mkdir -p build
+          godot --headless --export-debug "Android" build/game.apk
+
+      - name: APK Yükle (İndirmeye Hazır)
+        uses: actions/upload-artifact@v4
+        with:
+          name: istanbul-godot-apk
+          path: istanbul_city_godot/build/game.apk
