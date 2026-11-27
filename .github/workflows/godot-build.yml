@@ -1,0 +1,31 @@
+name: Build Godot APK
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build-android:
+      runs-on: ubuntu-latest
+      name: Godot Android Export
+      steps:
+        - name: Depoyu İndir
+          uses: actions/checkout@v4
+
+        - name: ZIP Açma
+          run: |
+            unzip -o "*.zip"
+
+        - name: Godot Export (Android)
+          uses: abarichello/godot-ci@v4.3.0
+          with:
+            name: android-build
+            project: istanbul_city_godot
+            android: true
+
+        - name: APK Yükle (İndirmeye Hazır)
+          uses: actions/upload-artifact@v4
+          with:
+            name: istanbul-godot-apk
+            path: /root/.local/share/godot/export/android-build/*.apk
